@@ -1,4 +1,4 @@
-const CACHE_NAME = 'piante-cache-v1';
+const CACHE_NAME = 'piante-cache-v2';
 const ASSETS = [
   './index.html',
   './manifest.json',
