@@ -1,0 +1,567 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>Le mie piante</title>
+<meta name="theme-color" content="#3D5C37">
+<link rel="manifest" href="manifest.json">
+<link rel="apple-touch-icon" href="icon-apple-touch.png">
+<link rel="icon" href="icon-192.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="Piante">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600&family=Space+Grotesk:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --paper:#F5F8EF;
+    --paper-2:#FFFFFF;
+    --ink:#000000;
+    --ink-soft:#000000;
+    --brick:#B7562F;
+    --moss:#5C7A54;
+    --moss-deep:#3D5C37;
+    --alert:#A23B2E;
+    --line: rgba(0,0,0,0.12);
+  }
+  *{box-sizing:border-box;}
+  body{
+    margin:0;
+    background:var(--paper);
+    color:var(--ink);
+    font-family:'Space Grotesk', sans-serif;
+    -webkit-font-smoothing:antialiased;
+    padding-top: env(safe-area-inset-top);
+  }
+  .wrap{
+    max-width:520px;
+    margin:0 auto;
+    padding:24px 20px 60px;
+  }
+  .hero{
+    display:flex;
+    align-items:flex-end;
+    justify-content:space-between;
+    gap:16px;
+    margin-bottom:22px;
+    padding-bottom:16px;
+    border-bottom:2px solid var(--ink);
+  }
+  .hero h1{
+    font-family:'Fraunces', serif;
+    font-size:26px;
+    font-weight:500;
+    margin:0 0 4px;
+    line-height:1.1;
+  }
+  .hero p{ margin:0; font-size:13px; color:var(--ink-soft); }
+  .hero-count{ text-align:right; flex-shrink:0; }
+  .hero-count .num{
+    font-family:'Fraunces', serif;
+    font-size:40px;
+    line-height:1;
+    color:var(--ink);
+    font-weight:600;
+    display:block;
+  }
+  .hero-count .lbl{ font-size:11px; color:var(--ink-soft); }
+
+  .toolbar{ display:flex; gap:10px; margin-bottom:18px; }
+  .add-toggle, .bell-toggle{
+    padding:13px 16px;
+    background:var(--moss-deep);
+    color:var(--paper);
+    border:none;
+    border-radius:10px;
+    font-family:'Space Grotesk', sans-serif;
+    font-size:14px;
+    font-weight:500;
+    cursor:pointer;
+  }
+  .add-toggle{ flex:1; }
+  .bell-toggle{
+    background:var(--paper-2);
+    color:var(--ink);
+    border:1.5px solid var(--line);
+    flex-shrink:0;
+  }
+  .bell-toggle.on{ background:var(--moss-deep); color:var(--paper); border-color:var(--moss-deep); }
+
+  .panel{
+    background:var(--paper-2);
+    border:1.5px solid var(--line);
+    border-radius:14px;
+    padding:18px;
+    margin-bottom:22px;
+    display:none;
+  }
+  .panel.open{ display:block; }
+  .panel h3{
+    font-family:'Fraunces', serif;
+    font-size:17px;
+    font-weight:500;
+    margin:0 0 4px;
+  }
+  .panel label{
+    display:block;
+    font-size:12px;
+    color:var(--ink-soft);
+    margin:12px 0 5px;
+  }
+  .panel label:first-of-type{ margin-top:12px; }
+  .panel input, .panel select{
+    width:100%;
+    padding:10px 12px;
+    border-radius:8px;
+    border:1.5px solid var(--line);
+    background:var(--paper);
+    font-family:'Space Grotesk', sans-serif;
+    font-size:14px;
+    color:var(--ink);
+  }
+  .row2{ display:flex; gap:10px; }
+  .row2 > div{ flex:1; }
+  .type-note{
+    font-size:12px;
+    color:var(--ink);
+    margin-top:6px;
+    min-height:16px;
+  }
+  .panel-actions{ display:flex; gap:10px; margin-top:16px; }
+  .btn-primary{
+    flex:1;
+    padding:11px;
+    background:var(--moss-deep);
+    color:var(--paper);
+    border:none;
+    border-radius:8px;
+    font-size:14px;
+    font-weight:500;
+    cursor:pointer;
+  }
+  .btn-ghost{
+    padding:11px 16px;
+    background:transparent;
+    color:var(--ink-soft);
+    border:1.5px solid var(--line);
+    border-radius:8px;
+    font-size:14px;
+    cursor:pointer;
+  }
+  .btn-danger{
+    padding:11px 16px;
+    background:transparent;
+    color:var(--ink);
+    border:1.5px solid var(--line);
+    border-radius:8px;
+    font-size:14px;
+    cursor:pointer;
+  }
+
+  .list{ display:flex; flex-direction:column; gap:12px; }
+  .card{
+    background:var(--paper-2);
+    border:1.5px solid var(--line);
+    border-radius:14px;
+    padding:14px 16px;
+    display:flex;
+    align-items:center;
+    gap:14px;
+    border-left:5px solid var(--moss);
+  }
+  .card.overdue{ border-left-color:var(--alert); }
+  .card.today{ border-left-color:var(--brick); }
+  .card-icon{
+    width:46px; height:46px;
+    border-radius:12px;
+    background:var(--paper);
+    display:flex; align-items:center; justify-content:center;
+    font-size:24px;
+    flex-shrink:0;
+    cursor:pointer;
+  }
+  .card-info{ flex:1; min-width:0; cursor:pointer; }
+  .card-name{
+    font-family:'Fraunces', serif;
+    font-size:17px;
+    font-weight:500;
+    margin:0 0 2px;
+    white-space:nowrap; overflow:hidden; text-overflow:ellipsis;
+  }
+  .card-type{ font-size:12px; color:var(--ink-soft); margin:0; }
+  .card-right{ display:flex; flex-direction:column; align-items:flex-end; gap:8px; flex-shrink:0; }
+  .status{
+    font-size:11px;
+    font-weight:600;
+    padding:4px 9px;
+    border-radius:20px;
+    white-space:nowrap;
+    background:rgba(92,122,84,0.15);
+    color:var(--ink);
+  }
+  .status.overdue{ background:rgba(162,59,46,0.13); color:var(--ink); }
+  .status.today{ background:rgba(183,86,47,0.13); color:var(--ink); }
+  .water-btn{
+    padding:8px 14px;
+    background:var(--moss);
+    color:var(--paper);
+    border:none;
+    border-radius:8px;
+    font-size:12px;
+    font-weight:600;
+    cursor:pointer;
+    white-space:nowrap;
+  }
+
+  .empty{ text-align:center; padding:50px 20px; color:var(--ink-soft); }
+  .empty .big{
+    font-family:'Fraunces', serif;
+    font-size:20px;
+    color:var(--ink);
+    margin-bottom:6px;
+  }
+  .note{
+    margin-top:30px;
+    font-size:12px;
+    color:var(--ink-soft);
+    line-height:1.5;
+    border-top:1px solid var(--line);
+    padding-top:16px;
+  }
+  .loading{ text-align:center; padding:40px; color:var(--ink-soft); font-size:14px; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="hero">
+    <div>
+      <h1>Le mie piante</h1>
+      <p>Il diario dell'innaffiatura</p>
+    </div>
+    <div class="hero-count">
+      <span class="num" id="dueCount">–</span>
+      <span class="lbl">da innaffiare</span>
+    </div>
+  </div>
+
+  <div class="toolbar">
+    <button class="add-toggle" id="toggleBtn">+ Aggiungi pianta</button>
+    <button class="bell-toggle" id="bellBtn" title="Notifiche">🔔</button>
+  </div>
+
+  <div class="panel" id="panel">
+    <h3 id="panelTitle">Nuova pianta</h3>
+    <label for="typeSelect">Tipo di pianta</label>
+    <select id="typeSelect"></select>
+    <div class="type-note" id="typeNote"></div>
+
+    <div class="row2" id="customRow" style="display:none;">
+      <div>
+        <label for="customDays">Ogni quanti giorni</label>
+        <input type="number" id="customDays" min="1" placeholder="es. 7">
+      </div>
+      <div>
+        <label for="customMl">Quanta acqua (ml)</label>
+        <input type="number" id="customMl" min="1" placeholder="es. 200">
+      </div>
+    </div>
+
+    <label for="nickname">Nome (facoltativo)</label>
+    <input type="text" id="nickname" placeholder="es. quella in cucina">
+
+    <div class="panel-actions">
+      <button class="btn-ghost" id="cancelBtn">Annulla</button>
+      <button class="btn-primary" id="saveBtn">Salva pianta</button>
+    </div>
+    <div class="panel-actions" id="deleteRow" style="display:none;">
+      <button class="btn-danger" id="deleteBtn" style="flex:1;">Rimuovi questa pianta</button>
+    </div>
+  </div>
+
+  <div id="listArea">
+    <div class="loading">Carico le tue piante…</div>
+  </div>
+
+  <div class="note" id="noteArea">
+    Tocca una pianta per modificarne tipo, nome o frequenza. Le notifiche funzionano solo mentre l'app è installata e viene aperta almeno una volta al giorno: senza un server dedicato non è possibile svegliarla quando è completamente chiusa, ma appena la riapri ti segnala subito cosa è in ritardo.
+  </div>
+</div>
+
+<script>
+const PLANT_TYPES = {
+  pothos:      { label:"Pothos", emoji:"🌿", days:9,  ml:200, note:"Tollera la siccità: meglio poca acqua che troppa." },
+  ficus:       { label:"Ficus", emoji:"🌳", days:7,  ml:300, note:"Terreno leggermente umido, mai fradicio." },
+  monstera:    { label:"Monstera", emoji:"🍃", days:7,  ml:250, note:"Aspetta che i primi 3-4 cm di terra siano asciutti." },
+  cactus:      { label:"Cactus", emoji:"🌵", days:21, ml:50,  note:"In inverno può bastare anche una volta al mese." },
+  succulenta:  { label:"Pianta grassa", emoji:"🪴", days:14, ml:80,  note:"Bagnare a fondo e lasciare asciugare completamente." },
+  orchidea:    { label:"Orchidea", emoji:"🌸", days:7,  ml:150, note:"Meglio per immersione, 10 minuti, poi scolare bene." },
+  basilico:    { label:"Basilico", emoji:"🌱", days:2,  ml:100, note:"Terreno sempre leggermente umido." },
+  aloe:        { label:"Aloe vera", emoji:"🌵", days:15, ml:100, note:"Poca acqua, molto sole." },
+  sansevieria: { label:"Sansevieria", emoji:"🗡️", days:18, ml:100, note:"Una delle più resistenti alla disidratazione." },
+  rosa:        { label:"Rosa", emoji:"🌹", days:3,  ml:300, note:"Innaffiare alla base, evitando le foglie." },
+  filodendro:  { label:"Filodendro", emoji:"🌿", days:7,  ml:200, note:"Terreno umido ma ben drenato." },
+  palma:       { label:"Palma", emoji:"🌴", days:7,  ml:400, note:"Ama l'umidità, evita i ristagni." },
+  ciclamino:   { label:"Ciclamino", emoji:"🌷", days:4,  ml:150, note:"Innaffiare dal basso, mai sul bulbo." },
+  bonsai:      { label:"Bonsai", emoji:"🌲", days:3,  ml:150, note:"Controllo quasi quotidiano dell'umidità del terreno." },
+  violetta:    { label:"Violetta africana", emoji:"💜", days:7,  ml:100, note:"Acqua a temperatura ambiente, mai sulle foglie." },
+  lavanda:     { label:"Lavanda", emoji:"🪻", days:10, ml:150, note:"Poca acqua, ama il terreno asciutto tra un turno e l'altro." },
+  edera:       { label:"Edera", emoji:"🌿", days:8,  ml:180, note:"Terreno uniformemente umido, non zuppo." },
+  felce:       { label:"Felce", emoji:"🌿", days:4,  ml:150, note:"Ama l'umidità costante, non far asciugare mai del tutto." },
+  calathea:    { label:"Calathea", emoji:"🍃", days:5,  ml:150, note:"Terreno sempre leggermente umido, acqua non calcarea." },
+  zamioculcas: { label:"Zamioculcas", emoji:"🪴", days:21, ml:100, note:"Molto resistente, tollera lunghi periodi senz'acqua." },
+  spatifillo:  { label:"Spatifillo", emoji:"🤍", days:5,  ml:200, note:"Le foglie si afflosciano quando ha sete: buon indicatore." },
+  begonia:     { label:"Begonia", emoji:"🌺", days:5,  ml:150, note:"Terreno umido ma mai incrostato, evita di bagnare le foglie." },
+  geranio:     { label:"Geranio", emoji:"🌸", days:4,  ml:200, note:"Predilige cicli asciutto-bagnato, evita ristagni." },
+  gardenia:    { label:"Gardenia", emoji:"🌼", days:4,  ml:200, note:"Terreno acido sempre umido, acqua non calcarea." },
+  azalea:      { label:"Azalea", emoji:"🌷", days:3,  ml:150, note:"Molto sensibile alla secchezza del terreno." },
+  kentia:      { label:"Kentia", emoji:"🌴", days:7,  ml:350, note:"Innaffiare quando i primi cm di terreno sono asciutti." },
+  dracena:     { label:"Dracena", emoji:"🌱", days:10, ml:200, note:"Meglio poca acqua: teme i ristagni idrici." },
+  tillandsia:  { label:"Tillandsia", emoji:"🌾", days:7,  ml:50,  note:"Nebulizzare o immergere brevemente, senza terriccio." },
+  menta:       { label:"Menta", emoji:"🌱", days:2,  ml:150, note:"Terreno sempre umido, cresce bene anche in poca luce." },
+  prezzemolo:  { label:"Prezzemolo", emoji:"🌿", days:2,  ml:100, note:"Non lasciare mai asciugare completamente il terreno." },
+  custom:      { label:"Altro / non in elenco", emoji:"🪴", days:null, ml:null, note:"Imposta tu l'intervallo e la quantità." }
+};
+
+let plants = [];
+let editingId = null;
+const DAY_MS = 86400000;
+
+function todayISO(){ return new Date().toISOString().slice(0,10); }
+function daysBetween(a,b){ return Math.floor((new Date(b) - new Date(a)) / DAY_MS); }
+
+function populateSelect(){
+  const sel = document.getElementById('typeSelect');
+  sel.innerHTML = '';
+  Object.entries(PLANT_TYPES).forEach(([key, t]) => {
+    const opt = document.createElement('option');
+    opt.value = key;
+    opt.textContent = `${t.emoji} ${t.label}`;
+    sel.appendChild(opt);
+  });
+  updateTypeNote();
+}
+
+function updateTypeNote(){
+  const key = document.getElementById('typeSelect').value;
+  const t = PLANT_TYPES[key];
+  const noteEl = document.getElementById('typeNote');
+  const customRow = document.getElementById('customRow');
+  if(key === 'custom'){
+    customRow.style.display = 'flex';
+    noteEl.textContent = t.note;
+  } else {
+    customRow.style.display = 'none';
+    noteEl.textContent = `${t.note} Circa ogni ${t.days} giorni, ${t.ml} ml.`;
+  }
+}
+
+async function loadPlants(){
+  try{
+    const res = await window.storage.get('plants', false);
+    plants = res && res.value ? JSON.parse(res.value) : [];
+  }catch(e){ plants = []; }
+  render();
+  checkAndNotify();
+}
+
+async function savePlants(){
+  try{ await window.storage.set('plants', JSON.stringify(plants), false); }
+  catch(e){ console.error('Errore nel salvataggio', e); }
+}
+
+function computeStatus(plant){
+  const since = daysBetween(plant.lastWatered, todayISO());
+  const remaining = plant.days - since;
+  return { since, remaining };
+}
+
+function render(){
+  const listArea = document.getElementById('listArea');
+  const dueCountEl = document.getElementById('dueCount');
+
+  if(plants.length === 0){
+    listArea.innerHTML = `<div class="empty">
+      <div class="big">Nessuna pianta ancora</div>
+      Aggiungi la prima per iniziare a tenerne traccia.
+    </div>`;
+    dueCountEl.textContent = '0';
+    return;
+  }
+
+  const withStatus = plants.map(p => ({...p, ...computeStatus(p)}));
+  withStatus.sort((a,b) => a.remaining - b.remaining);
+  dueCountEl.textContent = withStatus.filter(p => p.remaining <= 0).length;
+
+  listArea.innerHTML = `<div class="list">${withStatus.map(p => cardHTML(p)).join('')}</div>`;
+
+  withStatus.forEach(p => {
+    document.getElementById('water-'+p.id).addEventListener('click', (e) => { e.stopPropagation(); waterPlant(p.id); });
+    document.getElementById('open-'+p.id).addEventListener('click', () => openEdit(p.id));
+  });
+}
+
+function cardHTML(p){
+  const type = PLANT_TYPES[p.typeKey] || PLANT_TYPES.custom;
+  let cls = '', statusCls = '', statusText = '';
+  if(p.remaining < 0){ cls='overdue'; statusCls='overdue'; statusText = `in ritardo di ${Math.abs(p.remaining)} g`; }
+  else if(p.remaining === 0){ cls='today'; statusCls='today'; statusText = 'oggi'; }
+  else { statusText = `tra ${p.remaining} g`; }
+  const displayName = p.nickname && p.nickname.trim() ? p.nickname : type.label;
+
+  return `
+  <div class="card ${cls}" id="open-${p.id}">
+    <div class="card-icon">${type.emoji}</div>
+    <div class="card-info">
+      <p class="card-name">${escapeHTML(displayName)}</p>
+      <p class="card-type">${type.label} · ogni ${p.days} giorni</p>
+    </div>
+    <div class="card-right">
+      <span class="status ${statusCls}">${statusText}</span>
+      <button class="water-btn" id="water-${p.id}">💧 Innaffiata</button>
+    </div>
+  </div>`;
+}
+
+function escapeHTML(s){
+  const d = document.createElement('div');
+  d.textContent = s;
+  return d.innerHTML;
+}
+
+async function waterPlant(id){
+  const p = plants.find(x => x.id === id);
+  if(p){ p.lastWatered = todayISO(); render(); await savePlants(); }
+}
+
+function openPanel(title){
+  document.getElementById('panelTitle').textContent = title;
+  document.getElementById('panel').classList.add('open');
+  document.getElementById('toggleBtn').style.display = 'none';
+}
+function closePanel(){
+  document.getElementById('panel').classList.remove('open');
+  document.getElementById('toggleBtn').style.display = 'block';
+  document.getElementById('nickname').value = '';
+  document.getElementById('customDays').value = '';
+  document.getElementById('customMl').value = '';
+  document.getElementById('deleteRow').style.display = 'none';
+  document.getElementById('typeSelect').value = 'pothos';
+  updateTypeNote();
+  editingId = null;
+}
+
+function openEdit(id){
+  const p = plants.find(x => x.id === id);
+  if(!p) return;
+  editingId = id;
+  openPanel('Modifica pianta');
+  document.getElementById('typeSelect').value = p.typeKey;
+  document.getElementById('nickname').value = p.nickname || '';
+  updateTypeNote();
+  if(p.typeKey === 'custom'){
+    document.getElementById('customDays').value = p.days;
+    document.getElementById('customMl').value = p.ml;
+  }
+  document.getElementById('deleteRow').style.display = 'flex';
+}
+
+document.getElementById('typeSelect').addEventListener('change', updateTypeNote);
+document.getElementById('toggleBtn').addEventListener('click', () => openPanel('Nuova pianta'));
+document.getElementById('cancelBtn').addEventListener('click', closePanel);
+
+document.getElementById('deleteBtn').addEventListener('click', async () => {
+  if(editingId){
+    plants = plants.filter(x => x.id !== editingId);
+    closePanel();
+    render();
+    await savePlants();
+  }
+});
+
+document.getElementById('saveBtn').addEventListener('click', async () => {
+  const typeKey = document.getElementById('typeSelect').value;
+  const type = PLANT_TYPES[typeKey];
+  const nickname = document.getElementById('nickname').value.trim();
+  let days = type.days, ml = type.ml;
+
+  if(typeKey === 'custom'){
+    days = parseInt(document.getElementById('customDays').value, 10);
+    ml = parseInt(document.getElementById('customMl').value, 10);
+    if(!days || !ml){ alert('Inserisci sia i giorni che i millilitri.'); return; }
+  }
+
+  if(editingId){
+    const p = plants.find(x => x.id === editingId);
+    p.typeKey = typeKey; p.nickname = nickname; p.days = days; p.ml = ml;
+  } else {
+    plants.push({ id:'p_'+Date.now(), typeKey, nickname, days, ml, lastWatered: todayISO() });
+  }
+  closePanel();
+  render();
+  await savePlants();
+});
+
+// --- Notifiche ---
+function updateBellUI(){
+  const btn = document.getElementById('bellBtn');
+  if('Notification' in window && Notification.permission === 'granted'){
+    btn.classList.add('on');
+    btn.title = 'Notifiche attive';
+  } else {
+    btn.classList.remove('on');
+    btn.title = 'Attiva notifiche';
+  }
+}
+
+async function checkAndNotify(){
+  if(!('Notification' in window) || Notification.permission !== 'granted') return;
+  const withStatus = plants.map(p => ({...p, ...computeStatus(p)}));
+  const due = withStatus.filter(p => p.remaining <= 0);
+  if(due.length === 0) return;
+  const names = due.map(p => {
+    const type = PLANT_TYPES[p.typeKey] || PLANT_TYPES.custom;
+    return p.nickname && p.nickname.trim() ? p.nickname : type.label;
+  });
+  const body = due.length === 1
+    ? `${names[0]} ha bisogno d'acqua.`
+    : `${due.length} piante hanno bisogno d'acqua: ${names.join(', ')}.`;
+  try{
+    if(navigator.serviceWorker && navigator.serviceWorker.controller){
+      const reg = await navigator.serviceWorker.ready;
+      reg.showNotification('💧 Da innaffiare', { body, icon: 'icon-192.png' });
+    } else {
+      new Notification('💧 Da innaffiare', { body, icon: 'icon-192.png' });
+    }
+  }catch(e){ console.error(e); }
+}
+
+document.getElementById('bellBtn').addEventListener('click', async () => {
+  if(!('Notification' in window)){
+    alert('Il browser non supporta le notifiche.');
+    return;
+  }
+  if(Notification.permission === 'granted'){
+    alert("Le notifiche sono già attive. Le riceverai ogni volta che apri l'app e qualcosa è da innaffiare.");
+    return;
+  }
+  const perm = await Notification.requestPermission();
+  updateBellUI();
+  if(perm === 'granted') checkAndNotify();
+});
+
+// Ricontrolla periodicamente finché l'app resta aperta (non copre l'app chiusa)
+setInterval(checkAndNotify, 1000 * 60 * 60);
+
+if('serviceWorker' in navigator){
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('service-worker.js').catch(() => {});
+  });
+}
+
+populateSelect();
+updateBellUI();
+loadPlants();
+</script>
+</body>
+</html>
