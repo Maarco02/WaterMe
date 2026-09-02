@@ -1,7 +1,7 @@
 {
-  "name": "Le mie piante",
-  "short_name": "Piante",
-  "description": "Ricorda quando innaffiare le tue piante",
+  "name": "WaterMe",
+  "short_name": "WaterMe",
+  "description": "Remind to water your plants",
   "start_url": "./index.html",
   "scope": "./",
   "display": "standalone",
