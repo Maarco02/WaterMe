@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-<title>PlantMe</title>
+<title>WaterMe</title>
 <meta name="theme-color" content="#3D5C37">
 <link rel="manifest" href="manifest.json">
 <link rel="apple-touch-icon" href="icon-apple-touch.png">
@@ -236,8 +236,8 @@
 <div class="wrap">
   <div class="hero">
     <div>
-      <h1>Le mie piante</h1>
-      <p>Il diario dell'innaffiatura</p>
+      <h1>WaterMe</h1>
+      <p>Reminder to water your plant!</p>
     </div>
     <div class="hero-count">
       <span class="num" id="dueCount">–</span>
@@ -284,7 +284,7 @@
   </div>
 
   <div class="note" id="noteArea">
-    Tocca una pianta per modificarne tipo, nome o frequenza.
+    Tocca una pianta per modificare il nome o la tipologia.
   </div>
 </div>
 
@@ -309,7 +309,7 @@ const PLANT_TYPES = {
   edera:       { label:"Edera", emoji:"🌿", days:8,  ml:180, note:"Terreno uniformemente umido, non zuppo." },
   felce:       { label:"Felce", emoji:"🌿", days:4,  ml:150, note:"Ama l'umidità costante, non far asciugare mai del tutto." },
   calathea:    { label:"Calathea", emoji:"🍃", days:5,  ml:150, note:"Terreno sempre leggermente umido, acqua non calcarea." },
-  Kalanchoa: { label:"Kalanchoe", emoji:"🪴", days:7, ml:150, note:"Innaffiare quando il terreno è asciutto , evitare ristagni." },
+  zamioculcas: { label:"Zamioculcas", emoji:"🪴", days:21, ml:100, note:"Molto resistente, tollera lunghi periodi senz'acqua." },
   spatifillo:  { label:"Spatifillo", emoji:"🤍", days:5,  ml:200, note:"Le foglie si afflosciano quando ha sete: buon indicatore." },
   begonia:     { label:"Begonia", emoji:"🌺", days:5,  ml:150, note:"Terreno umido ma mai incrostato, evita di bagnare le foglie." },
   geranio:     { label:"Geranio", emoji:"🌸", days:4,  ml:200, note:"Predilige cicli asciutto-bagnato, evita ristagni." },
@@ -320,6 +320,7 @@ const PLANT_TYPES = {
   tillandsia:  { label:"Tillandsia", emoji:"🌾", days:7,  ml:50,  note:"Nebulizzare o immergere brevemente, senza terriccio." },
   menta:       { label:"Menta", emoji:"🌱", days:2,  ml:150, note:"Terreno sempre umido, cresce bene anche in poca luce." },
   prezzemolo:  { label:"Prezzemolo", emoji:"🌿", days:2,  ml:100, note:"Non lasciare mai asciugare completamente il terreno." },
+  Kalanchoa: { label:"Kalanchoe", emoji:"🪴", days:7, ml:150, note:"Innaffiare quando il terreno è asciutto , evitare ristagni." },
   custom:      { label:"Altro / non in elenco", emoji:"🪴", days:null, ml:null, note:"Imposta tu l'intervallo e la quantità." }
 };
 
@@ -358,15 +359,15 @@ function updateTypeNote(){
 
 async function loadPlants(){
   try{
-    const res = await window.storage.get('plants', false);
-    plants = res && res.value ? JSON.parse(res.value) : [];
+    const raw = localStorage.getItem('plants');
+    plants = raw ? JSON.parse(raw) : [];
   }catch(e){ plants = []; }
   render();
   checkAndNotify();
 }
 
 async function savePlants(){
-  try{ await window.storage.set('plants', JSON.stringify(plants), false); }
+  try{ localStorage.setItem('plants', JSON.stringify(plants)); }
   catch(e){ console.error('Errore nel salvataggio', e); }
 }
 
@@ -531,37 +532,4 @@ async function checkAndNotify(){
       const reg = await navigator.serviceWorker.ready;
       reg.showNotification('💧 Da innaffiare', { body, icon: 'icon-192.png' });
     } else {
-      new Notification('💧 Da innaffiare', { body, icon: 'icon-192.png' });
-    }
-  }catch(e){ console.error(e); }
-}
-
-document.getElementById('bellBtn').addEventListener('click', async () => {
-  if(!('Notification' in window)){
-    alert('Il browser non supporta le notifiche.');
-    return;
-  }
-  if(Notification.permission === 'granted'){
-    alert("Le notifiche sono già attive. Le riceverai ogni volta che apri l'app e qualcosa è da innaffiare.");
-    return;
-  }
-  const perm = await Notification.requestPermission();
-  updateBellUI();
-  if(perm === 'granted') checkAndNotify();
-});
-
-// Ricontrolla periodicamente finché l'app resta aperta (non copre l'app chiusa)
-setInterval(checkAndNotify, 1000 * 60 * 60);
-
-if('serviceWorker' in navigator){
-  window.addEventListener('load', () => {
-    navigator.serviceWorker.register('service-worker.js').catch(() => {});
-  });
-}
-
-populateSelect();
-updateBellUI();
-loadPlants();
-</script>
-</body>
-</html>
+      new
